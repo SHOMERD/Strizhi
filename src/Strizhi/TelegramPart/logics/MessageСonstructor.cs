@@ -21,12 +21,11 @@ namespace Strizhi.TelegramPart.logics
         private GptClient gptClient { get; set; }
 
 
-        public MessageСonstructor(ITelegramBotClient BotClient, DataBase dataBase, GptClient gptClient)
+        public MessageСonstructor(ITelegramBotClient BotClient, DataBase dataBase)
         {
-            menus = JsonConvert.DeserializeObject<List<Menu>>(File.ReadAllText(Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "/BotStructure.json"));
+            //menus = JsonConvert.DeserializeObject<List<Menu>>(File.ReadAllText(Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "/BotStructure.json"));
             botClient = BotClient;
             this.dataBase = dataBase;
-            this.gptClient = gptClient;
         }
 
 
@@ -36,7 +35,7 @@ namespace Strizhi.TelegramPart.logics
             MessegeText = "Ответ от чата:\n\n" + MessegeText;
 
             List<InlineKeyboardButton[]> inlineKeyboardButton = new List<InlineKeyboardButton[]>();
-            inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData("Переотправить", "Again") });
+            inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData("Переотправить", $"Again_{dataBase.GetUserPhoneNamber(UserID)}") });
 
             await botClient.SendMessage(
                 chatId: UserID,
@@ -47,13 +46,6 @@ namespace Strizhi.TelegramPart.logics
 
             return true;
         }
-
-        
-
-
-
-
-
 
 
 

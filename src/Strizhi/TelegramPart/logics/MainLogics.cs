@@ -32,6 +32,7 @@ namespace Strizhi.TelegramPart.logics
 
         public async Task Start()
         {
+
             dataBase = new DataBase();
             string f = Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "\\TelegramBotToken.txt";
             string c = File.ReadAllText(f);
@@ -41,7 +42,6 @@ namespace Strizhi.TelegramPart.logics
                 Console.WriteLine("Телеграм токена нет");
             }
             botClient = new TelegramBotClient(c);
-
             f = Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "\\GPTToken.txt";
             c = File.ReadAllText(f);
             Console.WriteLine(c);
@@ -52,7 +52,7 @@ namespace Strizhi.TelegramPart.logics
             GptClient gptClient = new GptClient(c);
 
 
-            
+
 
             receiverOptions = new ReceiverOptions
             {
@@ -77,9 +77,9 @@ namespace Strizhi.TelegramPart.logics
             Console.WriteLine($"{me.FirstName} запущен!");
 
 
-            messageСonstructor = new MessageСonstructor(botClient, dataBase, gptClient);
+            messageСonstructor = new MessageСonstructor(botClient, dataBase);
             Console.WriteLine("sdfg");
-            messageAnalyzer = new MessageAnalyzer(dataBase, botClient, messageСonstructor);
+            messageAnalyzer = new MessageAnalyzer(dataBase, botClient, messageСonstructor, gptClient);
         }
 
 

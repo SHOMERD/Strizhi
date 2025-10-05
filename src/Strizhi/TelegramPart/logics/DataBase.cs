@@ -44,6 +44,7 @@ namespace Strizhi.TelegramPart.logics
 
             if (!string.IsNullOrEmpty(PhoneNamber))
             {
+                File.Delete(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"{PhoneNamber}.txt"));
                 theUser.PhoneNamber = PhoneNamber;
             }
 
@@ -82,6 +83,11 @@ namespace Strizhi.TelegramPart.logics
             TheUser theUser = Context.Users.Where(a => a.Username == Username).FirstOrDefault();
             return theUser;
         }
+        public async Task<string> GetUserPhoneNamber(long GUserID)
+        {
+            string theUser = (Context.Users.Where(a => a.UserID == GUserID).FirstOrDefault()).PhoneNamber;
+            return theUser;
+        }
 
         public async Task<bool> CeckUserAsync(long UserID)
         {
@@ -102,6 +108,7 @@ namespace Strizhi.TelegramPart.logics
             Context.SaveChanges();
 
         }
+
 
 
         public async Task RemuveUserAsync(long UserID)

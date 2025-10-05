@@ -12,6 +12,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Net.Mime.MediaTypeNames;
 using Strizhi.TelegramPart.logics.MessageAnalyzers;
+using ChatGptVisionClient;
 
 namespace Strizhi.TelegramPart.logics
 {
@@ -24,9 +25,9 @@ namespace Strizhi.TelegramPart.logics
         public MessageСonstructor messageСonstructor { get; set; }
 
 
-        public MessageAnalyzer(DataBase dataBase, ITelegramBotClient BotClient, MessageСonstructor messageСonstructor)
+        public MessageAnalyzer(DataBase dataBase, ITelegramBotClient BotClient, MessageСonstructor messageСonstructor, GptClient gptClient)
         {
-            userMessageAnalyzer = new UserMessageAnalyzer(dataBase, BotClient, messageСonstructor);
+            userMessageAnalyzer = new UserMessageAnalyzer(dataBase, BotClient, messageСonstructor, gptClient);
 
             this.messageСonstructor = messageСonstructor;
             this.dataBase = dataBase;
@@ -37,6 +38,7 @@ namespace Strizhi.TelegramPart.logics
 
         public async Task AnalyzUpdate(Telegram.Bot.Types.Update update)
         {
+            
             switch (update.Type)
             {
                 case UpdateType.Message:

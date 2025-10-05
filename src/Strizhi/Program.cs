@@ -4,7 +4,7 @@ class Program
 {
     static async Task Main()
     {
-        MainLogics mainLogics = new MainLogics();
+          MainLogics mainLogics = new MainLogics();
         await Task.Delay(-1);
 
     }
