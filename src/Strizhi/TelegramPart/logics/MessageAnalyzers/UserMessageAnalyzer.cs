@@ -42,33 +42,58 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
         {
             if (message != null)
             {
-                if (!string.IsNullOrEmpty(message.Text)  && message.Text.Contains("/start"))
+                if (message.Text.Contains("/start"))
                 {
-                    
-                    
-                }
-            }
-
-            string uri = "";
-
-            List<System.Collections.Generic.IEnumerable<Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton>> a = message.ReplyMarkup.InlineKeyboard.ToList();
-            for (int i = 0; i < a.Count; i++)
-            {
-                for (int j = 0; j < a[i].Count(); j++)
-                {
-                    if (a[i].ToList()[0].Text.Contains("Открыть полный отчет"))
+                    if (await dataBase.CeckUserAsync(UserID))
                     {
-                        uri = a[i].ToList()[0].Url;
+                        await botClient.SendMessage(
+                             message.Chat.Id,
+                             text: $"Здравствуйте {message.From.FirstName.Trim('@')}" +
+                             $"\nРады снова вас видеть в нашем боте"
+                             );
                     }
+                    else
+                    {
+                        await dataBase.AddUserAsync(UserID, message.From.Username);
+                        await botClient.SendMessage(
+                            message.Chat.Id,
+                            text: $"Здравствуйте {message.From.FirstName.Trim('@')}");
+                    }
+                    return;
                 }
-                
             }
 
-            string PhoneNamber = message.Text.Substring(message.Text.IndexOf("7"), 11);
-            await FileСatcher.DownloadFile(uri, PhoneNamber);
-            string anser = await gptClient.SengToGPT(PhoneNamber);
-            dataBase.SetUserStats(UserID, PhoneNamber:PhoneNamber);
-            messageСonstructor.СonstructMessage(anser, UserID);
+            if (message.ReplyMarkup != null)
+            {
+                string uri = "";
+
+                List<System.Collections.Generic.IEnumerable<Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton>> a = message.ReplyMarkup.InlineKeyboard.ToList();
+                for (int i = 0; i < a.Count; i++)
+                {
+                    for (int j = 0; j < a[i].Count(); j++)
+                    {
+                        if (a[i].ToList()[0].Text.Contains("Открыть полный отчет"))
+                        {
+                            uri = a[i].ToList()[0].Url;
+                        }
+                    }
+
+                }
+
+                string PhoneNamber = message.Text.Substring(message.Text.IndexOf("7"), 11);
+                if (PhoneNamber != await dataBase.GetUserPhoneNamber(UserID))
+                {
+                    await FileСatcher.DeliteFile(await dataBase.GetUserPhoneNamber(UserID));
+                }           
+
+                await FileСatcher.DownloadFile(uri, PhoneNamber);
+                string anser = await gptClient.SengToGPT(PhoneNamber);
+                dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
+                messageСonstructor.СonstructMessage(anser, UserID);
+
+            }
+
+
 
         }
 
@@ -80,7 +105,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
         {
             if (callbackQuery.Data.Contains("Again"))
             {
-                string anser = await gptClient.SengToGPT((callbackQuery.Data.Split('_'))[2]);
+                string anser = await gptClient.SengToGPT((callbackQuery.Data.Split('_'))[1]);
                 messageСonstructor.СonstructMessage(anser, UserID);
 
             }

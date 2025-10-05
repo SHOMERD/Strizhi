@@ -13,7 +13,7 @@ namespace Strizhi.TelegramPart.Models
         {
             var folder = Environment.SpecialFolder.LocalApplicationData;
             var path = Environment.GetFolderPath(folder);
-            DbPath = Path.Join(path, "StrizhiUsers.db");
+            DbPath = Path.Join(path, "TGBOT\\StrizhiUsers.db");
         }
 
 

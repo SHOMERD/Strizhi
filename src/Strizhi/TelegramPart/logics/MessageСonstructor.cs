@@ -35,7 +35,7 @@ namespace Strizhi.TelegramPart.logics
             MessegeText = "Ответ от чата:\n\n" + MessegeText;
 
             List<InlineKeyboardButton[]> inlineKeyboardButton = new List<InlineKeyboardButton[]>();
-            inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData("Переотправить", $"Again_{dataBase.GetUserPhoneNamber(UserID)}") });
+            inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData("Переотправить", $"Again_{await dataBase.GetUserPhoneNamber(UserID)}") });
 
             await botClient.SendMessage(
                 chatId: UserID,

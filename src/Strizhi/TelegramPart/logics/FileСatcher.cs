@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Strizhi.TelegramPart.logics
 {
@@ -26,7 +27,7 @@ namespace Strizhi.TelegramPart.logics
                 string str = System.Text.Encoding.Default.GetString(data);
                 str = await TextCleaner.CleanText(str);
                 data = System.Text.Encoding.UTF8.GetBytes(str);
-                using (FileStream file = File.Create(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), fileName +".txt")))
+                using (FileStream file = File.Create(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\Clients\\" + fileName +".txt")))
                     file.Write(data, 0, data.Length);
             }
             return true;
@@ -36,7 +37,7 @@ namespace Strizhi.TelegramPart.logics
 
         public static async Task DeliteFile(string fileName)
         {
-            
+            File.Delete(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\Clients\\" + fileName + ".txt"));
         }
 
 

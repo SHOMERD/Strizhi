@@ -15,13 +15,14 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Strizhi.TelegramPart.logics
 {
+
     public class DataBase
     {
         public MyContext Context { get; set; }
 
         public DataBase()
         {
-            var path = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StrizhiUsers.db");
+            var path = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\StrizhiUsers.db");
             Context = new MyContext();
             try
             {
@@ -43,8 +44,7 @@ namespace Strizhi.TelegramPart.logics
             }
 
             if (!string.IsNullOrEmpty(PhoneNamber))
-            {
-                File.Delete(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"{PhoneNamber}.txt"));
+            {              
                 theUser.PhoneNamber = PhoneNamber;
             }
 
@@ -137,7 +137,7 @@ namespace Strizhi.TelegramPart.logics
             command.Connection = connection;
 
             command.CommandText =
-                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserID BIGINTEGER , PhoneNamber TEXT);";
+                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT, UserID BIGINTEGER , PhoneNamber TEXT);";
 
             command.ExecuteNonQuery();
 

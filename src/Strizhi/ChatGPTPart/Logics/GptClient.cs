@@ -30,9 +30,9 @@ namespace ChatGptVisionClient
             {             
                 return "Set OPENAI_API_KEY environment variable first.";
             }
-            string filePath1 = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "offers.docx");
-            string filePath2 = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"{ClientFileName}.txt");
-            string promptFilePath2 = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Promt.txt");
+            string filePath1 = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\offers.docx");
+            string filePath2 = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"TGBOT\\Clients\\{ClientFileName}.txt");
+            string promptFilePath2 = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\Promt.txt");
 
 
             string file1Content = await File.ReadAllTextAsync(filePath1);

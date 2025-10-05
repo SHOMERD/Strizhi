@@ -34,7 +34,9 @@ namespace Strizhi.TelegramPart.logics
         {
 
             dataBase = new DataBase();
-            string f = Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "\\TelegramBotToken.txt";
+            Directory.CreateDirectory(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT"));
+            Directory.CreateDirectory(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\Clients"));
+            string f = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\TelegramBotToken.txt");
             string c = File.ReadAllText(f);
             Console.WriteLine(c);
             if (string.IsNullOrEmpty(c))
@@ -42,7 +44,7 @@ namespace Strizhi.TelegramPart.logics
                 Console.WriteLine("Телеграм токена нет");
             }
             botClient = new TelegramBotClient(c);
-            f = Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "\\GPTToken.txt";
+            f = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\GPTToken.txt");
             c = File.ReadAllText(f);
             Console.WriteLine(c);
             if (string.IsNullOrEmpty(c))
