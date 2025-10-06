@@ -18,7 +18,6 @@ namespace Strizhi.TelegramPart.Models
         public long UserID { get; set; }
         public string Username { get; set; }
 
-
         public string? PhoneNamber { get; set; }
 
     }

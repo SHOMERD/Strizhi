@@ -93,7 +93,7 @@ namespace Strizhi.TelegramPart.logics
         {
             TheUser user = await GetUserAsync(UserID);
             return user != null;
-        }
+        } 
 
 
         public async Task AddUserAsync(long UserID, string Username)

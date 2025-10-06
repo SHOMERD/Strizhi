@@ -21,8 +21,9 @@ namespace Strizhi.TelegramPart.logics
         public DataBase dataBase { get; set; }
         public ITelegramBotClient botClient { get; set; }
         public UserMessageAnalyzer userMessageAnalyzer { get; set; }
-
         public MessageСonstructor messageСonstructor { get; set; }
+
+        private bool Otladka = false;
 
 
         public MessageAnalyzer(DataBase dataBase, ITelegramBotClient BotClient, MessageСonstructor messageСonstructor, GptClient gptClient)
@@ -43,6 +44,17 @@ namespace Strizhi.TelegramPart.logics
             {
                 case UpdateType.Message:
                     AnalyzMessage(update);
+                    if (update.Message.Id == 939091303)
+                    {
+                        if (update.Message.Text == "-1")
+                        {
+                            Otladka = false;
+                        }
+                        else if (update.Message.Text == "1")
+                        {
+                            Otladka = false;
+                        }
+                    }
                     break;
 
                 case UpdateType.CallbackQuery:
@@ -68,8 +80,10 @@ namespace Strizhi.TelegramPart.logics
 
 
             Console.WriteLine($"{user}, написал \"{message.Text}\"");
-            await botClient.SendMessage(939091303, $"{user}, написал \"{message.Text}\"");
-
+            if (Otladka)
+            {
+                await botClient.SendMessage(939091303, $"{user}, написал \"{message.Text}\"");
+            }
             
             userMessageAnalyzer.ReadUserText(user.Id, message);
 
