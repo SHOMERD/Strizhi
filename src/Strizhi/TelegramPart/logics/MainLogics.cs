@@ -34,54 +34,20 @@ namespace Strizhi.TelegramPart.logics
         {
 
             dataBase = new DataBase();
+
             Directory.CreateDirectory(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT"));
             Directory.CreateDirectory(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\Clients"));
-            string f = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\TelegramBotToken.txt");
-            string c = File.ReadAllText(f);
-            Console.WriteLine(c);
-            if (string.IsNullOrEmpty(c))
-            {
-                Console.WriteLine("Телеграм токена нет");
-            }
-            botClient = new TelegramBotClient(c);
-            f = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\GPTToken.txt");
-            c = File.ReadAllText(f);
-            Console.WriteLine(c);
-            if (string.IsNullOrEmpty(c))
-            {
-                Console.WriteLine("GPT токена нет");
-            }
-            GptClient gptClient = new GptClient(c);
+            SetTelegramBotClient();
+
+            messageСonstructor = new MessageСonstructor(botClient, dataBase);          
+            GptClient gptClient = new GptClient(messageСonstructor);
+            messageСonstructor.gptClient = gptClient;
 
 
-
-
-            receiverOptions = new ReceiverOptions
-            {
-                AllowedUpdates = new[]
-                {
-                UpdateType.Message,
-                UpdateType.CallbackQuery,
-                UpdateType.MyChatMember,
-                UpdateType.ChatMember,
-                UpdateType.ChatJoinRequest
-            },
-
-                DropPendingUpdates = true,
-            };
-
-            using var cts = new CancellationTokenSource();
-
-
-            botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions, cts.Token);
-
-            var me = await botClient.GetMe();
-            Console.WriteLine($"{me.FirstName} запущен!");
-
-
-            messageСonstructor = new MessageСonstructor(botClient, dataBase);
-            Console.WriteLine("sdfg");
             messageAnalyzer = new MessageAnalyzer(dataBase, botClient, messageСonstructor, gptClient);
+
+
+            Console.WriteLine("Оху*ть, РВБОТАЕТ!!!");
         }
 
 
@@ -115,7 +81,41 @@ namespace Strizhi.TelegramPart.logics
 
         }
 
+        private async void SetTelegramBotClient()
+        {
 
+            string f = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\TelegramBotToken.txt");
+            string c = File.ReadAllText(f);
+
+            Console.WriteLine(c);
+            if (string.IsNullOrEmpty(c))
+            {
+                Console.WriteLine("Телеграм токена нет");
+            }
+            botClient = new TelegramBotClient(c);
+
+            receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = new[]
+                {
+                UpdateType.Message,
+                UpdateType.CallbackQuery,
+                UpdateType.MyChatMember,
+                UpdateType.ChatMember,
+                UpdateType.ChatJoinRequest
+            },
+
+                DropPendingUpdates = true,
+            };
+
+            using var cts = new CancellationTokenSource();
+
+
+            botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions, cts.Token);
+
+            var me = await botClient.GetMe();
+            Console.WriteLine($"{me.FirstName} запущен!");
+        }
 
 
     }

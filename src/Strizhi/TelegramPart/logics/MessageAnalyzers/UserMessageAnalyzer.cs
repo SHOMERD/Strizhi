@@ -23,6 +23,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
         public ITelegramBotClient botClient { get; set; }
         public MessageСonstructor messageСonstructor { get; set; }
         public GptClient gptClient { get; set; }
+        private string Password;
 
         public UserMessageAnalyzer(DataBase dataBase, ITelegramBotClient BotClient, MessageСonstructor messageСonstructor, GptClient gptClient)
         {
@@ -40,26 +41,43 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
 
         public async void ReadUserText(long UserID, Message message)
         {
-            if (message != null)
+            try
+            {
+                await dataBase.CeckUserAsync(UserID);
+            }
+            catch (Exception)
+            {
+                await dataBase.AddUserAsync(UserID, message.From.Username);
+            }
+
+            if (message.Text != null)
             {
                 if (message.Text.Contains("/start"))
+                {                   
+                    await botClient.SendMessage(
+                        message.Chat.Id,
+                        text: $"Здравствуйте {message.From.FirstName.Trim('@')}");
+
+                    return;
+                }
+                if (message.Text.Contains("/Password") || message.Id == 939091303)
                 {
-                    if (await dataBase.CeckUserAsync(UserID))
+                    Password = message.Text.Split("\n")[1];
+                    return;
+                }              
+            }
+            if (message.Caption != null && message.Caption.Contains(Password))
+            {
+                if (message?.Document != null)
+                {
+                    if (await FileСatcher.DownloadAndReplaceFile(botClient, message))
                     {
-                        await botClient.SendMessage(
-                             message.Chat.Id,
-                             text: $"Здравствуйте {message.From.FirstName.Trim('@')}" +
-                             $"\nРады снова вас видеть в нашем боте"
-                             );
+                        await botClient.SendMessage(message.Chat.Id, "Файл успешно заменён!");
                     }
                     else
                     {
-                        await dataBase.AddUserAsync(UserID, message.From.Username);
-                        await botClient.SendMessage(
-                            message.Chat.Id,
-                            text: $"Здравствуйте {message.From.FirstName.Trim('@')}");
+                        await botClient.SendMessage(message.Chat.Id, "Файла нет!");
                     }
-                    return;
                 }
             }
 
@@ -87,9 +105,10 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                 }           
 
                 await FileСatcher.DownloadFile(uri, PhoneNamber);
-                string anser = await gptClient.SengToGPT(PhoneNamber);
                 dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
-                messageСonstructor.СonstructMessage(anser, UserID);
+
+                messageСonstructor.СonstructMessage("Answer", UserID);             
+               
 
             }
 
@@ -103,13 +122,25 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
 
         public async Task ReadUserCallback(long UserID, CallbackQuery callbackQuery)
         {
-            if (callbackQuery.Data.Contains("Again"))
+            string teg = callbackQuery.Data;
+            if (teg.Contains("Again"))
             {
-                string anser = await gptClient.SengToGPT((callbackQuery.Data.Split('_'))[1]);
-                messageСonstructor.СonstructMessage(anser, UserID);
+                teg = teg.Substring(teg.IndexOf('_'));
 
             }
+            if (teg.Contains("Reset_File"))
+            {
+                await FileСatcher.DeliteFile(await dataBase.GetUserPhoneNamber(UserID));
+                dataBase.SetUserStats(UserID, PhoneNamber: "-");
+            }
+            if (teg.Contains("SendOffer"))
+            {
+                ///////////////////////////////////////////////////////////
+                ///////////////////////////////////////////////////////////
+                ///////////////////////////////////////////////////////////
+            }
 
+            messageСonstructor.СonstructMessage(teg, UserID);
         }        
 
 

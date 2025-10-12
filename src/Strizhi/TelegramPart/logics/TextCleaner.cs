@@ -34,14 +34,6 @@ namespace Strizhi.TelegramPart.logics
             return text;
 
         }
-        //Водительское удостоверение: 9910749195   !!!!!
-        //Адрес:      
-        //=== СДЭК 2022 ===  (повторения)
-        //strings.RemoveAll(a => a.Contains("Юридический адрес работодателя:"));
-
-
-
-
 
     }
 }

@@ -10,6 +10,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Strizhi.ChatGPTPart.Models;
 
 namespace Strizhi.TelegramPart.logics
 {
@@ -18,34 +19,182 @@ namespace Strizhi.TelegramPart.logics
         List<Menu> menus { get; set; }
         public ITelegramBotClient botClient { get; set; }
         private DataBase dataBase { get; set; }
-        private GptClient gptClient { get; set; }
+        public GptClient gptClient { get; set; }
 
 
         public MessageСonstructor(ITelegramBotClient BotClient, DataBase dataBase)
         {
-            //menus = JsonConvert.DeserializeObject<List<Menu>>(File.ReadAllText(Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "/BotStructure.json"));
+            menus = JsonConvert.DeserializeObject<List<Menu>>(File.ReadAllText(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\BotStructure.json")));
             botClient = BotClient;
             this.dataBase = dataBase;
         }
 
 
 
-        public async Task<bool> СonstructMessage(string MessegeText, long UserID)
+        public async Task<bool> СonstructMessage(string Tag, long UserID, string MessegeText = null)
         {
-            MessegeText = "Ответ от чата:\n\n" + MessegeText;
+            Menu activeMenu = await GetMenu(Tag);
+            Menu menu = new Menu();
 
-            List<InlineKeyboardButton[]> inlineKeyboardButton = new List<InlineKeyboardButton[]>();
-            inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData("Переотправить", $"Again_{await dataBase.GetUserPhoneNamber(UserID)}") });
+            if (activeMenu == null)
+            {
+                return false;
+            }
+
+
+            if (string.IsNullOrEmpty(MessegeText))
+            {
+                MessegeText = activeMenu.MessageText;
+            }
+
+
+            if (activeMenu.PromtNumber != -1)
+            {
+                
+                Message Pad = await botClient.SendMessage(
+                    chatId: UserID,
+                    text: "Сообщение обрабатываается"
+                );
+                menu = await ProcessPromt(activeMenu, activeMenu.PromtNumber, await dataBase.GetUserPhoneNamber(UserID));
+
+                MessegeText = menu.MessageText;
+                await botClient.DeleteMessage(UserID, Pad.Id);
+               
+            }
+
+            List<string> ButtonsTexts = new List<string>();
+            ButtonsTexts.AddRange(activeMenu.ButtonsTexts);
+            ButtonsTexts.AddRange(menu.ButtonsTexts);
+            
+            List<string> ButtonsTegs = new List<string>();
+            ButtonsTegs.AddRange(activeMenu.ButtonsTegs);
+            ButtonsTegs.AddRange(menu.ButtonsTegs);
+
+            
 
             await botClient.SendMessage(
                 chatId: UserID,
                 text: MessegeText,
-                replyMarkup: new InlineKeyboardMarkup(inlineKeyboardButton)
+                replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs, activeMenu.ParentTeg))
+                );
+
+            return true;
+        }
+
+
+        public Uri ChekUrl(string Url)
+        {
+            if (!string.IsNullOrEmpty(Url))
+            {
+                try
+                {
+                    return new Uri(Url);
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        async Task<Menu> ProcessPromt(Menu activeMenu, int PromtNumber, string PhoneNamber)
+        {
+            Menu menu = new Menu();
+            Answer Anser = await gptClient.RequestToAI(activeMenu.PromtNumber, PhoneNamber);
+            if (Anser == null)
+            {
+                menu.MessageText = $"GPT не смог ответить из-за технической ошибки";
+                menu.ButtonsTegs = new List<string>() { $"Again_{activeMenu.Teg}", " ", "Reset_File" };
+                menu.ButtonsTexts = new List<string>() { $"Заново", "Do_Nothing", "Отмена" };
+                return menu;
+            }
+            
+
+            menu = await SetMenuBatons(activeMenu, Anser);
+            menu.MessageText = Anser.Text;
+            return menu;
+        }
+
+        async Task<Menu> SetMenuBatons(Menu activeMenu, Answer Anser)
+        {
+            Menu menu = new Menu();
+            string BattonTeg = "";
+            string BattonText = "";
+            switch (activeMenu.PromtNumber)
+            {
+                case 1:
+                    BattonTeg = "SendOffer_";
+                    BattonText = "Прислать офер";
+                    break;
+                case 2:
+                    BattonTeg = "SendOffer_";
+                    BattonText = "Прислать офер";
+                    break;
+                default:                   
+                    break;
+            }
+
+            List<string> Tags = Anser.Parts.Select(part => BattonTeg + part.ButtonTag).ToList();
+            List<string> Texts = Anser.Parts.Select(part => BattonText + part.Description).ToList();
+            menu.ButtonsTegs.AddRange(Tags);
+            menu.ButtonsTexts.AddRange(Texts);
+
+            return menu;
+        }
+
+
+        public async Task<InlineKeyboardMarkup> GetKeyboardButtons(List<string> ButtonsTexts = null, List<string> ButtonsTegs = null, string ParentTeg = null)
+        {
+            List<InlineKeyboardButton[]> inlineKeyboardButton = new List<InlineKeyboardButton[]>();
+            if (ButtonsTexts != null && ButtonsTegs != null && ButtonsTexts.Count == ButtonsTegs.Count)
+            {
+                for (int i = 0; i < ButtonsTexts.Count; i++)
+                {
+                    if (ChekUrl(ButtonsTegs[i]) != null)
+                    {
+                        inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithUrl(ButtonsTexts[i], ButtonsTegs[i]) });
+                    }
+                    else
+                    {
+                        inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData(ButtonsTexts[i], ButtonsTegs[i]) });
+                    }
+                }
+
+
+                if (!string.IsNullOrEmpty(ParentTeg))
+                {
+                    inlineKeyboardButton.Add(new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData("Назад", ParentTeg) });
+                }              
+
+            }
+            return new InlineKeyboardMarkup(inlineKeyboardButton);
+        }
+
+        public async Task<Menu> GetMenu(string Tag)
+        {
+            for (int i = 0; i < menus.Count; i++)
+            {
+                if (menus[i].Teg == Tag)
+                {
+                    return menus[i];
+                }
+            }
+            return null;
+        }
+
+        public async Task<bool> ErrorMessage(string MessegeText)
+        {
+            await botClient.SendMessage(
+                chatId: 939091303,
+                text: MessegeText
                 );
 
 
             return true;
         }
+
+
 
 
 

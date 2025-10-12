@@ -14,14 +14,19 @@ namespace Strizhi.TelegramPart.Models
 
         public string MessageText { get; set; }
 
-        public List<string> Files { get; set; }
+        public int PromtNumber { get; set; }
 
         public List<string> ButtonsTexts { get; set; }
         public List<string> ButtonsTegs { get; set; }
 
-        public List<string> ChildrenMenuTegs { get; set; }
-
-
-
+        public Menu()
+        {
+            Teg = "";
+            ParentTeg = "";
+            MessageText = "";
+            PromtNumber = -1;
+            ButtonsTexts = new List<string>();
+            ButtonsTegs = new List<string>();
+        }
     }
 }

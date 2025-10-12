@@ -79,10 +79,11 @@ namespace Strizhi.TelegramPart.logics
             var chat = message.Chat;
 
 
-            Console.WriteLine($"{user}, написал \"{message.Text}\"");
+            
             if (Otladka)
             {
                 await botClient.SendMessage(939091303, $"{user}, написал \"{message.Text}\"");
+                Console.WriteLine($"{user}, написал \"{message.Text}\"");
             }
             
             userMessageAnalyzer.ReadUserText(user.Id, message);
