@@ -26,8 +26,10 @@ namespace ChatGptVisionClient
 
         private List<Promt> prompts {get; set; }
 
+        public string GPTVersion{ get; set; }
 
-        public MessageСonstructor messageСonstructor { get; set; }
+
+    public MessageСonstructor messageСonstructor { get; set; }
 
 
 
@@ -37,6 +39,7 @@ namespace ChatGptVisionClient
             _http = new HttpClient();
             UpdateData();
 
+            GPTVersion = "gpt-5-nano";
             if (string.IsNullOrEmpty(ApiKey))
             {
                 messageСonstructor.ErrorMessage("Set OPENAI_API_KEY environment variable first.");
@@ -50,17 +53,23 @@ namespace ChatGptVisionClient
             string Task = "";
             for (int i = 0; i < prompts[RequestTag].Files.Count; i++)
             {
-                Task += $"Файл {i+1}:\n[{ReadFile(prompts[RequestTag].Files[i], Client)}]\n";
+                Task += $"File {i+1}:\n[{await ReadFile(prompts[RequestTag].Files[i], null)}]\n";
             }
+            if (prompts[RequestTag].Hashtags.Contains("ClienInfo") )
+            {
+                Task += $"File with customer information:\n[{await ReadFile("", Client)}]\n";
+            }
+
             Task += $"\nЗадание:\n{prompts[RequestTag].PromtText}";
 
-            if (true)
-            {
-                Answer answer = new Answer();
-                answer.Text = "Заглушка";
-                answer.Parts = new List<Parts>() { new Parts("ButtonTag", "Description"), new Parts("Tag", "Ddaad") };
-                return answer;
-            }
+
+            //if (true)
+            //{
+            //    Answer answer = new Answer();
+            //    answer.Text = "Заглушка";
+            //    answer.Parts = new List<Parts>() { new Parts("ButtonTag", "Description"), new Parts("Tag", "Ddaad") };
+            //    return answer;
+            //}
 
             return await SengToGPT(Task);
         }
@@ -103,49 +112,41 @@ namespace ChatGptVisionClient
             {
                 name = "anser",
                 strict = true,
-                json_schema = new
+                schema = new
                 {
-                    name = "anser",
-                    strict = true,
-                    schema = new
+                    type = "object",
+                    properties = new
                     {
-                        
-                        type = "object",
-                        properties = new
+                        text = new { type = "string" },
+                        parts = new
                         {
-                            text = new { type = "string" },
-                            parts = new
+                            type = "array",
+                            items = new
                             {
-                                type = "array",
-                                items = new
+                                type = "object",
+                                properties = new
                                 {
-                                    type = "object",
-                                    properties = new
-                                    {
-                                        ButtonTag = new { type = "string" },
-                                        Description = new { type = "string" },                                     
-                                    },
-                                    required = new[] { "ButtonTag", "Description"},
-                                    additionalProperties = false
-                                }
+                                    ButtonTag = new { type = "string" },
+                                    BriefDescription = new { type = "string" },
+                                    Description = new { type = "string" },
+                                },
+                                required = new[] { "ButtonTag", "BriefDescription", "Description" },
+                                additionalProperties = false
                             }
-                        },
-                        required = new[] { "text" },
-                        additionalProperties = false
-                    }
+                        }
+                    },
+                    required = new[] { "text", "parts" },
+                    additionalProperties = false
                 }
             };
 
-
-            return new
+            var request = new
             {
-                model = "gpt-5-nano", // или "gpt-5" при доступе
+                model = GPTVersion,
                 messages = new object[]
                 {
-                new { role = "system", content = "You are an assistant who analyzes files/websites. " +
-                                                "You must return JSON strictly according to the specified schema. " +
-                                                "The response will be used by a person who speaks Russian. " },
-                new { role = "user", content = Prompt }
+                    new { role = "system", content = "You are an assistant who analyzes files/websites. Return JSON strictly according to the schema." },
+                    new { role = "user", content = Prompt }
                 },
                 response_format = new
                 {
@@ -153,16 +154,14 @@ namespace ChatGptVisionClient
                     json_schema = schema
                 }
 
-
             };
+            return request;
 
         }
-
-
-        public async Task<string> ReadFile(string FileName, string Client = null)
+        public async Task<string> ReadFile(string FileName, string Client = null)   ////Hashtags убрать нах
         {
             string FilePath = "";
-            if (FileName == "ClienInfo")
+            if (Client != null)
             {
                 FilePath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"TGBOT\\Clients\\{Client}.txt");
             }
@@ -170,8 +169,9 @@ namespace ChatGptVisionClient
             {
                 FilePath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"TGBOT\\{FileName}");
             }
-            
-            return await File.ReadAllTextAsync(FilePath);
+            string FileText = await File.ReadAllTextAsync(FilePath); 
+
+            return FileText;
         }
 
 

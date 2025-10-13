@@ -25,6 +25,8 @@ namespace Strizhi.TelegramPart.logics
 
         private bool Otladka = false;
 
+        GptClient gptClient { get; set; }
+
 
         public MessageAnalyzer(DataBase dataBase, ITelegramBotClient BotClient, MessageСonstructor messageСonstructor, GptClient gptClient)
         {
@@ -33,6 +35,7 @@ namespace Strizhi.TelegramPart.logics
             this.messageСonstructor = messageСonstructor;
             this.dataBase = dataBase;
             botClient = BotClient;
+            this.gptClient = gptClient;
 
         }
 
@@ -54,6 +57,11 @@ namespace Strizhi.TelegramPart.logics
                         {
                             Otladka = false;
                         }
+                        if (update.Message.Text.Contains("gpt-5"))
+                        {
+                            gptClient.GPTVersion = update.Message.Text;
+                        }
+
                     }
                     break;
 

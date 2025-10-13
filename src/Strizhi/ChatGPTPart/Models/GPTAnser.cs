@@ -15,15 +15,18 @@ namespace Strizhi.ChatGPTPart.Models
 
     public class Parts
     {
-        public Parts(string ButtonTag, string Description)
+        public Parts(string ButtonTag, string Description, string BriefDescription)
         {
             this.ButtonTag = ButtonTag;
             this.Description = Description;
+            this.BriefDescription = BriefDescription;
         }
 
         public Parts() { }
 
         public string ButtonTag { get; set; }
         public string Description { get; set; }
+        public string BriefDescription { get; set; }
+
     }
 }

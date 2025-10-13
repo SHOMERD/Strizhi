@@ -23,6 +23,8 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
         public ITelegramBotClient botClient { get; set; }
         public MessageСonstructor messageСonstructor { get; set; }
         public GptClient gptClient { get; set; }
+
+        List<string> Offers { get; set; }
         private string Password;
 
         public UserMessageAnalyzer(DataBase dataBase, ITelegramBotClient BotClient, MessageСonstructor messageСonstructor, GptClient gptClient)
@@ -32,10 +34,16 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
             this.messageСonstructor = messageСonstructor;
             this.gptClient = gptClient;
 
+            SetOffers();
         }
 
 
+        public async void SetOffers()
+        {
+            string offersFilePath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\offers.txt");
 
+            Offers = (await System.IO.File.ReadAllTextAsync(offersFilePath)).Split("-----------------------------------").ToList();
+        }
 
 
 
@@ -125,7 +133,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
             string teg = callbackQuery.Data;
             if (teg.Contains("Again"))
             {
-                teg = teg.Substring(teg.IndexOf('_'));
+                teg = teg.Substring(teg.IndexOf('_')+1);
 
             }
             if (teg.Contains("Reset_File"))
@@ -135,9 +143,10 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
             }
             if (teg.Contains("SendOffer"))
             {
-                ///////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////
+                string Find = $"{teg.Split("_")[1]})";
+                string Offer = Offers.FirstOrDefault(a => a.Contains(Find));
+                await messageСonstructor.СonstructMessage("SendOffer_", UserID, Offer);
+
             }
 
             messageСonstructor.СonstructMessage(teg, UserID);

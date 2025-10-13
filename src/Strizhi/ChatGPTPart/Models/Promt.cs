@@ -12,6 +12,7 @@ namespace Strizhi.ChatGPTPart.Models
         public string PromtText { get; set; }
 
         public List<string> Files { get; set; }
+        public List<string> Hashtags { get; set; }
 
     }
 }

@@ -11,6 +11,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Strizhi.ChatGPTPart.Models;
+using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Strizhi.TelegramPart.logics
 {
@@ -63,20 +65,50 @@ namespace Strizhi.TelegramPart.logics
             }
 
             List<string> ButtonsTexts = new List<string>();
-            ButtonsTexts.AddRange(activeMenu.ButtonsTexts);
-            ButtonsTexts.AddRange(menu.ButtonsTexts);
-            
             List<string> ButtonsTegs = new List<string>();
-            ButtonsTegs.AddRange(activeMenu.ButtonsTegs);
+            if (menu.Teg != "Error")
+            {
+                ButtonsTexts.AddRange(activeMenu.ButtonsTexts);
+                ButtonsTegs.AddRange(activeMenu.ButtonsTegs);
+            }
+            ButtonsTexts.AddRange(menu.ButtonsTexts);            
             ButtonsTegs.AddRange(menu.ButtonsTegs);
 
-            
 
-            await botClient.SendMessage(
+            if (MessegeText.Length > 4000)
+            {              
+                var result = new List<string>();
+                int startIndex = 0;
+                while (startIndex < MessegeText.Length)
+                {
+                    
+                    int endIndex = Math.Min(startIndex + 4000, MessegeText.Length);
+                    string chunk = MessegeText.Substring(startIndex, endIndex - startIndex);
+                    result.Add(chunk);
+                    startIndex += 4000;
+                }
+
+                for (int i = 0; i < result.Count-1; i++)
+                {
+                    await botClient.SendMessage(
+                        chatId: UserID,
+                        text: result[i]
+                        );
+                }
+                await botClient.SendMessage(
+                    chatId: UserID,
+                    text: result.Last(),
+                    replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs, activeMenu.ParentTeg))
+                    );
+            }
+            else
+            {
+                await botClient.SendMessage(
                 chatId: UserID,
                 text: MessegeText,
                 replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs, activeMenu.ParentTeg))
                 );
+            }        
 
             return true;
         }
@@ -105,15 +137,29 @@ namespace Strizhi.TelegramPart.logics
             if (Anser == null)
             {
                 menu.MessageText = $"GPT не смог ответить из-за технической ошибки";
-                menu.ButtonsTegs = new List<string>() { $"Again_{activeMenu.Teg}", " ", "Reset_File" };
-                menu.ButtonsTexts = new List<string>() { $"Заново", "Do_Nothing", "Отмена" };
+                menu.ButtonsTegs = new List<string>() { $"Again_{activeMenu.Teg}", "Do_Nothing", "Reset_File" };
+                menu.ButtonsTexts = new List<string>() { $"Заново", "-", "Отмена" };
+                menu.Teg = "Error";
                 return menu;
             }
             
 
             menu = await SetMenuBatons(activeMenu, Anser);
-            menu.MessageText = Anser.Text;
+            menu.MessageText = await GetAnseText(Anser);
+            
             return menu;
+        }
+
+        async Task<string> GetAnseText(Answer Anser)
+        {
+            string MessageText = Anser.Text;
+            for (int i = 0; i < Anser.Parts.Count; i++)
+            {
+                MessageText += "\n__________\n";
+                MessageText += Anser.Parts[i].Description;
+            }
+
+            return MessageText;
         }
 
         async Task<Menu> SetMenuBatons(Menu activeMenu, Answer Anser)
@@ -125,18 +171,18 @@ namespace Strizhi.TelegramPart.logics
             {
                 case 1:
                     BattonTeg = "SendOffer_";
-                    BattonText = "Прислать офер";
+                    BattonText = "Прислать офер ";
                     break;
                 case 2:
                     BattonTeg = "SendOffer_";
-                    BattonText = "Прислать офер";
+                    BattonText = "Прислать офер ";
                     break;
                 default:                   
                     break;
             }
 
             List<string> Tags = Anser.Parts.Select(part => BattonTeg + part.ButtonTag).ToList();
-            List<string> Texts = Anser.Parts.Select(part => BattonText + part.Description).ToList();
+            List<string> Texts = Anser.Parts.Select(part => BattonText + part.BriefDescription).ToList();
             menu.ButtonsTegs.AddRange(Tags);
             menu.ButtonsTexts.AddRange(Texts);
 

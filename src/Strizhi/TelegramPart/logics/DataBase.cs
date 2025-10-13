@@ -54,21 +54,6 @@ namespace Strizhi.TelegramPart.logics
 
         }
 
-        public async Task SetUserPhoto(long UserID,string FileId)
-        {
-            string f = Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("\\bin")) + "\\TelegramBotToken.txt";
-            string c = File.ReadAllText(f);
-            string url = $"https://api.telegram.org/file/bot{c}/{FileId}";
-            var path = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), $"{UserID}.jpg");
-
-
-
-            using (var httpClient = new HttpClient())
-            {
-                var bytes = await httpClient.GetByteArrayAsync(url);
-                await File.WriteAllBytesAsync(path, bytes);
-            }
-        }
 
         public async Task<TheUser> GetUserAsync(long GUserID)
         {
@@ -91,8 +76,16 @@ namespace Strizhi.TelegramPart.logics
 
         public async Task<bool> CeckUserAsync(long UserID)
         {
-            TheUser user = await GetUserAsync(UserID);
-            return user != null;
+            try
+            {
+                TheUser user = await GetUserAsync(UserID);
+                return user != null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            
         } 
 
 
