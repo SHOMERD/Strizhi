@@ -42,12 +42,15 @@ namespace Strizhi.TelegramPart.logics
 
         public async Task AnalyzUpdate(Telegram.Bot.Types.Update update)
         {
-            
+
             switch (update.Type)
             {
                 case UpdateType.Message:
-                    AnalyzMessage(update);
-                    if (update.Message.Id == 939091303)
+                    if (!await dataBase.CeckUserAsync(update.Message.Chat.Id))
+                    {
+                        await dataBase.AddUserAsync(update.Message.Chat.Id, update.Message.From.Username);
+                    }
+                    if (update.Message.Chat.Id == 939091303)
                     {
                         if (update.Message.Text == "-1")
                         {
@@ -55,7 +58,7 @@ namespace Strizhi.TelegramPart.logics
                         }
                         else if (update.Message.Text == "1")
                         {
-                            Otladka = false;
+                            Otladka = true;
                         }
                         if (update.Message.Text.Contains("gpt-5"))
                         {
@@ -63,9 +66,15 @@ namespace Strizhi.TelegramPart.logics
                         }
 
                     }
+                   
+                    AnalyzMessage(update);
                     break;
 
                 case UpdateType.CallbackQuery:
+                    if (!await dataBase.CeckUserAsync(update.CallbackQuery.From.Id))
+                    {
+                        await dataBase.AddUserAsync(update.CallbackQuery.From.Id, update.CallbackQuery.From.Username);
+                    }
                     await userMessageAnalyzer.ReadUserCallback(update.CallbackQuery.From.Id, update.CallbackQuery);
                     break;
 
@@ -92,6 +101,7 @@ namespace Strizhi.TelegramPart.logics
             {
                 await botClient.SendMessage(939091303, $"{user}, написал \"{message.Text}\"");
                 Console.WriteLine($"{user}, написал \"{message.Text}\"");
+                FileСatcher.Loger($"{user}, написал \"{message.Text}\"");
             }
             
             userMessageAnalyzer.ReadUserText(user.Id, message);

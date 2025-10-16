@@ -10,6 +10,7 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Strizhi.TelegramPart.logics;
 using static System.Net.Mime.MediaTypeNames;
 namespace Strizhi.TelegramPart.logics
 {
@@ -63,6 +64,7 @@ namespace Strizhi.TelegramPart.logics
 
             botClient.SendMessage(939091303, ErrorMessage);
             Console.WriteLine(ErrorMessage);
+            FileСatcher.Loger(ErrorMessage);
 
         }
 
@@ -77,6 +79,8 @@ namespace Strizhi.TelegramPart.logics
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                FileСatcher.Loger(ex.ToString());
+
             }
 
         }
@@ -91,6 +95,7 @@ namespace Strizhi.TelegramPart.logics
             if (string.IsNullOrEmpty(c))
             {
                 Console.WriteLine("Телеграм токена нет");
+                FileСatcher.Loger("Телеграм токена нет");
             }
             botClient = new TelegramBotClient(c);
 

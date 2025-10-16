@@ -74,7 +74,7 @@ namespace Strizhi.TelegramPart.logics
             ButtonsTexts.AddRange(menu.ButtonsTexts);            
             ButtonsTegs.AddRange(menu.ButtonsTegs);
 
-
+            FileСatcher.Loger(MessegeText);
             if (MessegeText.Length > 4000)
             {              
                 var result = new List<string>();
@@ -108,8 +108,8 @@ namespace Strizhi.TelegramPart.logics
                 text: MessegeText,
                 replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs, activeMenu.ParentTeg))
                 );
-            }        
-
+            }
+            
             return true;
         }
 

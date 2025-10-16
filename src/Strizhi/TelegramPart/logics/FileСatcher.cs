@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Strizhi.TelegramPart.logics
@@ -68,6 +69,16 @@ namespace Strizhi.TelegramPart.logics
 
             }else {return false;}
 
+        }
+
+        public static void Loger(string text)
+        {
+            string fileName = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\" +"LOGS.txt");
+            if (!File.Exists(fileName))
+            {
+                File.Create(fileName);
+            }
+            File.AppendAllText(fileName, "\n____________\n"+text);
         }
     }
 }

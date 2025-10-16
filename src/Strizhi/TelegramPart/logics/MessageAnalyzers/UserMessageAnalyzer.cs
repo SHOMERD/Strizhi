@@ -49,14 +49,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
 
         public async void ReadUserText(long UserID, Message message)
         {
-            try
-            {
-                await dataBase.CeckUserAsync(UserID);
-            }
-            catch (Exception)
-            {
-                await dataBase.AddUserAsync(UserID, message.From.Username);
-            }
+            
 
             if (message.Text != null)
             {
