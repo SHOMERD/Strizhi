@@ -73,6 +73,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                 {
                     if (await FileСatcher.DownloadAndReplaceFile(botClient, message))
                     {
+                        await gptClient.UpdateData();
                         await botClient.SendMessage(message.Chat.Id, "Файл успешно заменён!");
                     }
                     else

@@ -50,7 +50,7 @@ namespace Strizhi.TelegramPart.logics
                     {
                         await dataBase.AddUserAsync(update.Message.Chat.Id, update.Message.From.Username);
                     }
-                    if (update.Message.Chat.Id == 939091303)
+                    if (update.Message.Chat.Id == 939091303 && update.Message.Text != null)
                     {
                         if (update.Message.Text == "-1")
                         {

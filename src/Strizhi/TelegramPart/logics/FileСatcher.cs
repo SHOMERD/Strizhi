@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using ChatGptVisionClient;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -49,7 +50,6 @@ namespace Strizhi.TelegramPart.logics
             string filePath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\" + document.Document.FileName);
             if (File.Exists(filePath))
             {
-                // Получаем путь к файлу в Telegram
                 var file = await botClient.GetFile(document.Document.FileId);
 
 

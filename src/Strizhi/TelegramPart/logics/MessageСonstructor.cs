@@ -55,7 +55,7 @@ namespace Strizhi.TelegramPart.logics
                 
                 Message Pad = await botClient.SendMessage(
                     chatId: UserID,
-                    text: "Сообщение обрабатываается"
+                    text: "Пока это сообщение есть, GPT обрабатывает запрос"
                 );
                 menu = await ProcessPromt(activeMenu, activeMenu.PromtNumber, await dataBase.GetUserPhoneNamber(UserID));
 
@@ -241,7 +241,11 @@ namespace Strizhi.TelegramPart.logics
         }
 
 
+        public async Task UpdateData()
+        {
+            menus = JsonConvert.DeserializeObject<List<Menu>>(File.ReadAllText(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\BotStructure.json")));
 
+        }
 
 
     }
