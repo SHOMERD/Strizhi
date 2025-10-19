@@ -58,6 +58,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                     await botClient.SendMessage(
                         message.Chat.Id,
                         text: $"Здравствуйте {message.From.FirstName.Trim('@')}");
+                    messageСonstructor.СonstructMessage("Correct_Format", UserID);
 
                     return;
                 }
@@ -123,9 +124,13 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                 await FileСatcher.DownloadFile(uri, PhoneNamber);
                 dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
 
-                messageСonstructor.СonstructMessage("Answer", UserID);             
-               
+                messageСonstructor.СonstructMessage("Answer", UserID);
 
+
+            }
+            else
+            {
+                messageСonstructor.СonstructMessage("Incorrect_Format", UserID);
             }
 
 
