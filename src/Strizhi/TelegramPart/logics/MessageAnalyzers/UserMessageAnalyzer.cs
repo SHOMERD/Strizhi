@@ -61,11 +61,12 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
 
                     return;
                 }
-                if (message.Text.Contains("/Password") || message.Id == 939091303)
+                if (message.Text.Contains("/Password") && message.Id == 939091303)
                 {
                     Password = message.Text.Split("\n")[1];
                     return;
-                }              
+                }
+
             }
             if (message.Caption != null && message.Caption.Contains(Password))
             {
@@ -86,19 +87,32 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
             if (message.ReplyMarkup != null)
             {
                 string uri = "";
-
-                List<System.Collections.Generic.IEnumerable<Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton>> a = message.ReplyMarkup.InlineKeyboard.ToList();
-                for (int i = 0; i < a.Count; i++)
+                try
                 {
-                    for (int j = 0; j < a[i].Count(); j++)
+                    List<System.Collections.Generic.IEnumerable<Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton>> a = message.ReplyMarkup.InlineKeyboard.ToList();
+                    for (int i = 0; i < a.Count; i++)
                     {
-                        if (a[i].ToList()[0].Text.Contains("Открыть полный отчет"))
+                        for (int j = 0; j < a[i].Count(); j++)
                         {
-                            uri = a[i].ToList()[0].Url;
+                            if (a[i].ToList()[0].Text.Contains("Открыть полный отчет"))
+                            {
+                                uri = a[i].ToList()[0].Url;
+                            }
                         }
-                    }
 
+                    }
+                    if (string.IsNullOrEmpty(uri))
+                    {
+                        messageСonstructor.СonstructMessage("Incorrect_Format", UserID);
+                        return;
+                    }
                 }
+                catch (Exception a)
+                {
+                    messageСonstructor.СonstructMessage("Incorrect_Format", UserID);
+                    return;
+                }
+                
 
                 string PhoneNamber = message.Text.Substring(message.Text.IndexOf("7"), 11);
                 if (PhoneNamber != await dataBase.GetUserPhoneNamber(UserID))

@@ -60,7 +60,7 @@ namespace Strizhi.TelegramPart.logics
                         {
                             Otladka = true;
                         }
-                        if (update.Message.Text.Contains("gpt-5"))
+                        if (update.Message.Text.Contains("gpt"))
                         {
                             gptClient.GPTVersion = update.Message.Text;
                         }
@@ -75,6 +75,7 @@ namespace Strizhi.TelegramPart.logics
                     {
                         await dataBase.AddUserAsync(update.CallbackQuery.From.Id, update.CallbackQuery.From.Username);
                     }
+                    FileСatcher.Loger($"{update.CallbackQuery.From}, написал \"{update.CallbackQuery}\"");
                     await userMessageAnalyzer.ReadUserCallback(update.CallbackQuery.From.Id, update.CallbackQuery);
                     break;
 

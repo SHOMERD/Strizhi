@@ -48,7 +48,6 @@ namespace Strizhi.TelegramPart.logics
             messageAnalyzer = new MessageAnalyzer(dataBase, botClient, messageСonstructor, gptClient);
 
 
-            Console.WriteLine("Оху*ть, РВБОТАЕТ!!!");
         }
 
 

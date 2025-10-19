@@ -74,7 +74,7 @@ namespace Strizhi.TelegramPart.logics
             ButtonsTexts.AddRange(menu.ButtonsTexts);            
             ButtonsTegs.AddRange(menu.ButtonsTegs);
 
-            FileСatcher.Loger(MessegeText);
+            FileСatcher.Loger("отправлено сообщение\n"+MessegeText);
             if (MessegeText.Length > 4000)
             {              
                 var result = new List<string>();

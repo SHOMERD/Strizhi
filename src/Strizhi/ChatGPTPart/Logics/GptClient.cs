@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Strizhi.ChatGPTPart.Models;
 using Newtonsoft.Json;
-
+using Strizhi.TelegramPart.logics;
 
 
 namespace ChatGptVisionClient
@@ -71,6 +71,7 @@ namespace ChatGptVisionClient
             //    return answer;
             //}
 
+
             return await SengToGPT(Task);
         }
 
@@ -103,6 +104,7 @@ namespace ChatGptVisionClient
                 .GetProperty("content")
                 .GetString();
 
+            FileСatcher.Loger("__Ответ GPT" + message);
             return JsonConvert.DeserializeObject<Answer>(message);
         }
 

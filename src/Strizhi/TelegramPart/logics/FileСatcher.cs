@@ -78,7 +78,7 @@ namespace Strizhi.TelegramPart.logics
             {
                 File.Create(fileName);
             }
-            File.AppendAllText(fileName, "\n____________\n"+text);
+            File.AppendAllText(fileName, $"\n\n%%               {DateTime.Now}\n" + text+ "&&");
         }
     }
 }
