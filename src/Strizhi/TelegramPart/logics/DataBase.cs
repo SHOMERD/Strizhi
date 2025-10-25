@@ -34,7 +34,7 @@ namespace Strizhi.TelegramPart.logics
             }
         }
 
-        public async Task SetUserStats(long UserID, string Username = null, int ExpectedDataStatus = int.MinValue, int ChildExpectedDataStatus = int.MinValue, string PhoneNamber = "no")
+        public async Task SetUserStats(long UserID, string Username = null, string PhoneNamber = "no")
         {
             TheUser theUser = await GetUserAsync(UserID);
 
@@ -54,7 +54,19 @@ namespace Strizhi.TelegramPart.logics
 
         }
 
+        public async Task SetOffer(string FileName = null, string OfferNamber = "")
+        {
+            UserFile userFile = await GetFileAsync(FileName);
 
+            if (!string.IsNullOrEmpty(OfferNamber))
+            {
+                userFile.Offer = Convert.ToInt32(OfferNamber);
+            }
+
+            Context.Files.Update(userFile);
+            Context.SaveChanges();
+
+        }
         public async Task<TheUser> GetUserAsync(long GUserID)
         {
             TheUser theUser = Context.Users.Where(a => a.UserID == GUserID).FirstOrDefault();

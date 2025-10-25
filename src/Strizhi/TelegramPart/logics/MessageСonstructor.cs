@@ -113,24 +113,53 @@ namespace Strizhi.TelegramPart.logics
             return true;
         }
 
-        public async Task<bool> СonstructFileMessage(string Tag, long UserID, List<UserFile> userFiles)
+        public async Task<bool> СonstructFileMessage(string Tag, long UserID)
         {
+            List<UserFile> userFiles = await dataBase.GetFilesAsync(UserID);
             Menu menu = await GetMenu("ParseFiles");
-            List<string> ButtonsTexts;
-            List<string> ButtonsTegs;
+            List<string> ButtonsTexts = new List<string>();
+            List<string> ButtonsTegs  = new List<string>();
 
             for (int i = 0; i < userFiles.Count; i++)
             {
-                ButtonsTexts = menu.ButtonsTexts;
-                ButtonsTegs = menu.ButtonsTegs;
+                ButtonsTexts.AddRange(menu.ButtonsTexts);
+                ButtonsTegs.AddRange(menu.ButtonsTegs);
                 ButtonsTegs[0] += userFiles[i].FileName;
                 ButtonsTegs[1] += userFiles[i].FileName;
                 await botClient.SendMessage(
                     chatId: UserID,
-                    text: "",
+                    text: $"Файл по номеру {userFiles[i].FileName}\nПердположительное имя \"{FileСatcher.GetClientName(userFiles[i].FileName)}\"",
                     replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs))
                 );
             }
+
+            return true;
+        }
+        public async Task<bool> СonstructOfferSeterMessage(string Tag, long UserID)
+        {
+            Menu menu = await GetMenu("SubmitAnOffer_");
+
+            List<string> ButtonsTexts = new List<string>();
+            List<string> ButtonsTegs = new List<string>();
+
+            string offersFilePath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\offers.txt");
+            List<string> Offers = (await System.IO.File.ReadAllTextAsync(offersFilePath)).Split("-----------------------------------").ToList();
+            
+            Offers.RemoveAll(a=> a =="");
+            Offers.RemoveAll(a => a == "\n");
+
+            string FileName = Tag.Substring(Tag.IndexOf('_') + 1);
+
+            ButtonsTexts = Offers.Select(a => a.Substring(1,a.IndexOf(")"))).ToList();
+            ButtonsTegs = Offers.Select(a => $"SetOffer_{FileName}_"+ a.Substring(1, a.IndexOf(")")-1)).ToList();
+
+
+            await botClient.SendMessage(
+                    chatId: UserID,
+                    text: $"Номер офера:",
+                    replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs))
+                );
+            
 
             return true;
         }

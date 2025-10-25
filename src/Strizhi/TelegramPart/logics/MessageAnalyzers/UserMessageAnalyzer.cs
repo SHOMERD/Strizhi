@@ -117,20 +117,23 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                 
 
                 string PhoneNamber = message.Text.Substring(message.Text.IndexOf("7"), 11);
-
-
-                int FilsCount = await dataBase.GetFilesCountAsync(UserID);
-                if (FilsCount > 5)
+                if(await dataBase.CeckFileAsync(PhoneNamber))
                 {
-                    messageСonstructor.СonstructMessage("LotsOfFiles", UserID, MessegeText: $"У вас {FilsCount} файлов");
+                    messageСonstructor.СonstructMessage("AlreadyProcessed", UserID);
                 }
-                await FileСatcher.DownloadFile(uri, PhoneNamber);
-                dataBase.AddFileAsync(UserID, PhoneNamber);
-                dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
+                else
+                {
+                    int FilsCount = (await dataBase.GetFilesAsync(UserID)).Where(a => a.Offer == -1).Count();
+                    if (FilsCount == 1)
+                    {
+                        messageСonstructor.СonstructMessage("LotsOfFiles", UserID, MessegeText: $"У вас {FilsCount} файлов");
+                    }
+                    await FileСatcher.DownloadFile(uri, PhoneNamber);
+                    dataBase.AddFileAsync(UserID, PhoneNamber);
+                    dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
 
-                messageСonstructor.СonstructMessage("Answer", UserID);
-
-
+                    messageСonstructor.СonstructMessage("Answer", UserID);
+                }             
             }
             else
             {
@@ -159,30 +162,40 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                 string Find = $"{teg.Split("_")[1]})";
                 string Offer = Offers.FirstOrDefault(a => a.Contains(Find));
                 await messageСonstructor.СonstructMessage("SendOffer_", UserID, Offer);
+                return;
 
             }
             if (teg.Contains("ParseFiles"))
             {
-                List<UserFile> userFiles = await dataBase.GetFilesAsync(UserID);
-                for (int i = 0; i < userFiles.Count; i++) {
-                    messageСonstructor.СonstructFileMessage(teg, UserID, userFiles);
-                }
                 
+                    messageСonstructor.СonstructFileMessage(teg, UserID);
+                
+                return;
 
             }
             if (teg.Contains("Skip"))
             {
                 botClient.DeleteMessage(UserID, callbackQuery.Message.Id);
+                return;
             }
             if (teg.Contains("DeleteFile_"))
             {
                 dataBase.RemuveFileAsync(teg.Substring(teg.IndexOf('_') + 1));
                 botClient.DeleteMessage(UserID, callbackQuery.Message.Id);
+                return;
             }
             if (teg.Contains("SubmitAnOffer_"))
             {
-                
+                await messageСonstructor.СonstructOfferSeterMessage(teg, UserID);
                 botClient.DeleteMessage(UserID, callbackQuery.Message.Id);
+                return;
+            }
+            if (teg.Contains("SetOffer_"))
+            {
+                
+                dataBase.SetOffer($"{teg.Split("_")[1]}", teg.Split("_")[2]);
+                botClient.DeleteMessage(UserID, callbackQuery.Message.Id);
+                return;
             }
 
             messageСonstructor.СonstructMessage(teg, UserID);
