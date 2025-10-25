@@ -42,7 +42,7 @@ namespace Strizhi.TelegramPart.logics
             {
                 theUser.Username = Username;
             }
-
+          
             if (!string.IsNullOrEmpty(PhoneNamber))
             {              
                 theUser.PhoneNamber = PhoneNamber;
@@ -73,6 +73,27 @@ namespace Strizhi.TelegramPart.logics
             string theUser = (Context.Users.Where(a => a.UserID == GUserID).FirstOrDefault()).PhoneNamber;
             return theUser;
         }
+       
+        public async Task<UserFile> GetFileAsync(int FileID)
+        {
+            UserFile userFile = Context.Files.Where(a => a.Id == FileID).FirstOrDefault();
+            return userFile;
+        }
+        public async Task<UserFile> GetFileAsync(string FileName)
+        {
+            UserFile userFile = Context.Files.Where(a => a.FileName == FileName).FirstOrDefault();
+            return userFile;
+        }
+        public async Task<List<UserFile>> GetFilesAsync(long UserID)
+        {
+            List<UserFile> userFile = Context.Files.Where(a => a.UserID == UserID).ToList() ;
+            return userFile;
+        }
+        public async Task<int> GetFilesCountAsync(long UserID)
+        {
+            List<UserFile> userFile = Context.Files.Where(a => a.UserID == UserID).ToList();
+            return userFile.Count;
+        }
 
         public async Task<bool> CeckUserAsync(long UserID)
         {
@@ -80,6 +101,19 @@ namespace Strizhi.TelegramPart.logics
             {
                 TheUser user = await GetUserAsync(UserID);
                 return user != null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            
+        } 
+        public async Task<bool> CeckFileAsync(string FileName)
+        {
+            try
+            {
+                UserFile File = await GetFileAsync(FileName);
+                return File != null;
             }
             catch (Exception)
             {
@@ -101,8 +135,41 @@ namespace Strizhi.TelegramPart.logics
             Context.SaveChanges();
 
         }
+        public async Task AddFileAsync(long UserID, string FileName)
+        {
+            UserFile userFile = new UserFile() { Offer = -1, UserID = UserID,  FileName= FileName, СlientName = FileСatcher.GetClientName(FileName) };
 
 
+            if (!await CeckFileAsync(FileName))
+            {
+                Context.Files.Add(userFile);
+            }
+            Context.SaveChanges();
+
+        }
+
+        public async Task RemuveFileAsync(int FileID)
+        {
+            var File = await GetFileAsync(FileID);
+            if (File != null)
+            {
+                FileСatcher.DeliteFile(File.FileName);
+                Context.Remove(File);
+                Context.SaveChanges();
+            }
+
+        }
+        public async Task RemuveFileAsync(string FileName)
+        {
+            var File = await GetFileAsync(FileName);
+            if (File != null)
+            {
+                FileСatcher.DeliteFile(File.FileName);
+                Context.Remove(File);
+                Context.SaveChanges();
+            }
+
+        }
 
         public async Task RemuveUserAsync(long UserID)
         {
@@ -130,9 +197,10 @@ namespace Strizhi.TelegramPart.logics
             command.Connection = connection;
 
             command.CommandText =
-                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT, UserID BIGINTEGER , PhoneNamber TEXT);";
+                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT, UserID BIGINTEGER , PhoneNamber TEXT);"+
+                "CREATE TABLE Files(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserName TEXT, UserID BIGINTEGER , FileName TEXT, Offer INTEGER, СlientName TEXT);";
 
-            command.ExecuteNonQuery();
+        command.ExecuteNonQuery();
 
         }
 

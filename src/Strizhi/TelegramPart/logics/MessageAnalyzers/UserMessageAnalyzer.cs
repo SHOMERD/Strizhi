@@ -1,19 +1,20 @@
-﻿using Strizhi.TelegramPart.Models;
+﻿using ChatGptVisionClient;
+using Microsoft.EntityFrameworkCore.Storage;
+using Strizhi.TelegramPart.logics;
+using Strizhi.TelegramPart.Models;
+using Strizhi.TelegramPart.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Telegram.Bot.Types;
 using Telegram.Bot;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Net.Mime.MediaTypeNames;
-using Strizhi.TelegramPart.Models;
-using Strizhi.TelegramPart.logics;
-using System.IO;
 using static System.Net.WebRequestMethods;
-using ChatGptVisionClient;
 
 namespace Strizhi.TelegramPart.logics.MessageAnalyzers
 {
@@ -58,7 +59,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                     await botClient.SendMessage(
                         message.Chat.Id,
                         text: $"Здравствуйте {message.From.FirstName.Trim('@')}");
-                    messageСonstructor.СonstructMessage("Correct_Format", UserID);
+                    messageСonstructor.СonstructMessage("CorrectFormat", UserID);
 
                     return;
                 }
@@ -104,24 +105,27 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                     }
                     if (string.IsNullOrEmpty(uri))
                     {
-                        messageСonstructor.СonstructMessage("Incorrect_Format", UserID);
+                        messageСonstructor.СonstructMessage("IncorrectFormat", UserID);
                         return;
                     }
                 }
                 catch (Exception a)
                 {
-                    messageСonstructor.СonstructMessage("Incorrect_Format", UserID);
+                    messageСonstructor.СonstructMessage("IncorrectFormat", UserID);
                     return;
                 }
                 
 
                 string PhoneNamber = message.Text.Substring(message.Text.IndexOf("7"), 11);
-                if (PhoneNamber != await dataBase.GetUserPhoneNamber(UserID))
-                {
-                    await FileСatcher.DeliteFile(await dataBase.GetUserPhoneNamber(UserID));
-                }           
 
+
+                int FilsCount = await dataBase.GetFilesCountAsync(UserID);
+                if (FilsCount > 5)
+                {
+                    messageСonstructor.СonstructMessage("LotsOfFiles", UserID, MessegeText: $"У вас {FilsCount} файлов");
+                }
                 await FileСatcher.DownloadFile(uri, PhoneNamber);
+                dataBase.AddFileAsync(UserID, PhoneNamber);
                 dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
 
                 messageСonstructor.СonstructMessage("Answer", UserID);
@@ -130,7 +134,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
             }
             else
             {
-                messageСonstructor.СonstructMessage("Incorrect_Format", UserID);
+                messageСonstructor.СonstructMessage("IncorrectFormat", UserID);
             }
 
 
@@ -149,17 +153,35 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                 teg = teg.Substring(teg.IndexOf('_')+1);
 
             }
-            if (teg.Contains("Reset_File"))
-            {
-                await FileСatcher.DeliteFile(await dataBase.GetUserPhoneNamber(UserID));
-                dataBase.SetUserStats(UserID, PhoneNamber: "-");
-            }
             if (teg.Contains("SendOffer"))
             {
                 string Find = $"{teg.Split("_")[1]})";
                 string Offer = Offers.FirstOrDefault(a => a.Contains(Find));
                 await messageСonstructor.СonstructMessage("SendOffer_", UserID, Offer);
 
+            }
+            if (teg.Contains("ParseFiles"))
+            {
+                List<UserFile> userFiles = await dataBase.GetFilesAsync(UserID);
+                for (int i = 0; i < userFiles.Count; i++) {
+                    messageСonstructor.СonstructFileMessage(teg, UserID, userFiles);
+                }
+                
+
+            }
+            if (teg.Contains("Skip"))
+            {
+                botClient.DeleteMessage(UserID, callbackQuery.Message.Id);
+            }
+            if (teg.Contains("DeleteFile_"))
+            {
+                dataBase.RemuveFileAsync(teg.Substring(teg.IndexOf('_') + 1));
+                botClient.DeleteMessage(UserID, callbackQuery.Message.Id);
+            }
+            if (teg.Contains("SubmitAnOffer_"))
+            {
+                
+                botClient.DeleteMessage(UserID, callbackQuery.Message.Id);
             }
 
             messageСonstructor.СonstructMessage(teg, UserID);

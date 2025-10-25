@@ -71,6 +71,15 @@ namespace Strizhi.TelegramPart.logics
 
         }
 
+        public static string GetClientName(string FileName)
+        {
+            string fileText = File.ReadAllText(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\Clients\\" + FileName + ".txt"));
+
+            string Name = fileText.Substring(fileText.IndexOf(":")+2);
+            Name = Name.Substring(0, Name.IndexOf(" "));
+            return Name;
+        }
+
         public static void Loger(string text)
         {
             string fileName = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TGBOT\\" +"LOGS.txt");

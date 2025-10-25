@@ -42,7 +42,7 @@ namespace Strizhi.TelegramPart.logics
             {
                 return false;
             }
-
+            
 
             if (string.IsNullOrEmpty(MessegeText))
             {
@@ -113,7 +113,27 @@ namespace Strizhi.TelegramPart.logics
             return true;
         }
 
+        public async Task<bool> СonstructFileMessage(string Tag, long UserID, List<UserFile> userFiles)
+        {
+            Menu menu = await GetMenu("ParseFiles");
+            List<string> ButtonsTexts;
+            List<string> ButtonsTegs;
 
+            for (int i = 0; i < userFiles.Count; i++)
+            {
+                ButtonsTexts = menu.ButtonsTexts;
+                ButtonsTegs = menu.ButtonsTegs;
+                ButtonsTegs[0] += userFiles[i].FileName;
+                ButtonsTegs[1] += userFiles[i].FileName;
+                await botClient.SendMessage(
+                    chatId: UserID,
+                    text: "",
+                    replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs))
+                );
+            }
+
+            return true;
+        }
         public Uri ChekUrl(string Url)
         {
             if (!string.IsNullOrEmpty(Url))
@@ -137,8 +157,8 @@ namespace Strizhi.TelegramPart.logics
             if (Anser == null)
             {
                 menu.MessageText = $"GPT не смог ответить из-за технической ошибки";
-                menu.ButtonsTegs = new List<string>() { $"Again_{activeMenu.Teg}", "Do_Nothing", "Reset_File" };
-                menu.ButtonsTexts = new List<string>() { $"Заново", "-", "Отмена" };
+                menu.ButtonsTegs = new List<string>() { $"Again_{activeMenu.Teg}" };
+                menu.ButtonsTexts = new List<string>() { $"Заново" };
                 menu.Teg = "Error";
                 return menu;
             }
@@ -216,6 +236,7 @@ namespace Strizhi.TelegramPart.logics
             }
             return new InlineKeyboardMarkup(inlineKeyboardButton);
         }
+        
 
         public async Task<Menu> GetMenu(string Tag)
         {
