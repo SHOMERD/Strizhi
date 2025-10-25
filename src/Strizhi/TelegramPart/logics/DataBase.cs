@@ -34,7 +34,7 @@ namespace Strizhi.TelegramPart.logics
             }
         }
 
-        public async Task SetUserStats(long UserID, string Username = null, int ExpectedDataStatus = int.MinValue, int ChildExpectedDataStatus = int.MinValue, string PhoneNamber = "")
+        public async Task SetUserStats(long UserID, string Username = null, int ExpectedDataStatus = int.MinValue, int ChildExpectedDataStatus = int.MinValue, string PhoneNamber = "no")
         {
             TheUser theUser = await GetUserAsync(UserID);
 
@@ -91,7 +91,7 @@ namespace Strizhi.TelegramPart.logics
 
         public async Task AddUserAsync(long UserID, string Username)
         {
-            TheUser user = new TheUser() { UserID = UserID, Username = Username, PhoneNamber ="" };
+            TheUser user = new TheUser() { UserID = UserID, Username = Username, PhoneNamber ="no" };
 
 
             if (!await CeckUserAsync(UserID))

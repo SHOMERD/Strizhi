@@ -152,7 +152,7 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
             if (teg.Contains("Reset_File"))
             {
                 await FileСatcher.DeliteFile(await dataBase.GetUserPhoneNamber(UserID));
-                dataBase.SetUserStats(UserID, PhoneNamber: "-");
+                dataBase.SetUserStats(UserID, PhoneNamber: "no");
             }
             if (teg.Contains("SendOffer"))
             {
