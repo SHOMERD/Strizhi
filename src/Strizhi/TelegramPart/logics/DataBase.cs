@@ -34,14 +34,9 @@ namespace Strizhi.TelegramPart.logics
             }
         }
 
-        public async Task SetUserStats(long UserID, string Username = null, string PhoneNamber = "no")
+        public async Task SetUserStats(long UserID, string PhoneNamber = "no")
         {
             TheUser theUser = await GetUserAsync(UserID);
-
-            if (!string.IsNullOrEmpty(Username))
-            {
-                theUser.Username = Username;
-            }
           
             if (!string.IsNullOrEmpty(PhoneNamber))
             {              
@@ -61,39 +56,30 @@ namespace Strizhi.TelegramPart.logics
             if (!string.IsNullOrEmpty(OfferNamber))
             {
                 userFile.Offer = Convert.ToInt32(OfferNamber);
+                Context.Files.Update(userFile);
+                Context.SaveChanges();
             }
-
-            Context.Files.Update(userFile);
-            Context.SaveChanges();
-
+          
         }
         public async Task<TheUser> GetUserAsync(long GUserID)
         {
-            TheUser theUser = Context.Users.Where(a => a.UserID == GUserID).FirstOrDefault();
-            return theUser;
-        }
-
-
-
-        public async Task<TheUser> GetUserAsync(string Username)
-        {
-            TheUser theUser = Context.Users.Where(a => a.Username == Username).FirstOrDefault();
+            TheUser theUser = Context.Users.First(a => a.UserID == GUserID);
             return theUser;
         }
         public async Task<string> GetUserPhoneNamber(long GUserID)
         {
-            string theUser = (Context.Users.Where(a => a.UserID == GUserID).FirstOrDefault()).PhoneNamber;
+            string theUser = (Context.Users.First(a => a.UserID == GUserID)).PhoneNamber;
             return theUser;
         }
        
         public async Task<UserFile> GetFileAsync(int FileID)
         {
-            UserFile userFile = Context.Files.Where(a => a.Id == FileID).FirstOrDefault();
+            UserFile userFile = Context.Files.First(a => a.Id == FileID );
             return userFile;
         }
         public async Task<UserFile> GetFileAsync(string FileName)
         {
-            UserFile userFile = Context.Files.Where(a => a.FileName == FileName).FirstOrDefault();
+            UserFile userFile = Context.Files.First(a => a.FileName == FileName);
             return userFile;
         }
         public async Task<List<UserFile>> GetFilesAsync(long UserID)
@@ -135,9 +121,9 @@ namespace Strizhi.TelegramPart.logics
         } 
 
 
-        public async Task AddUserAsync(long UserID, string Username)
+        public async Task AddUserAsync(long UserID)
         {
-            TheUser user = new TheUser() { UserID = UserID, Username = Username, PhoneNamber ="no" };
+            TheUser user = new TheUser() { UserID = UserID, PhoneNamber ="no" };
 
 
             if (!await CeckUserAsync(UserID))
@@ -194,11 +180,6 @@ namespace Strizhi.TelegramPart.logics
 
         }
 
-        public async Task RemuveChatFromMembersChecker(long ChatID)
-        {
-            RemuveUserAsync(ChatID);
-        }
-
         public async Task CreateDataBase()
         {
             using var db = new MyContext();
@@ -209,8 +190,8 @@ namespace Strizhi.TelegramPart.logics
             command.Connection = connection;
 
             command.CommandText =
-                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT, UserID BIGINTEGER , PhoneNamber TEXT);"+
-                "CREATE TABLE Files(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserName TEXT, UserID BIGINTEGER , FileName TEXT, Offer INTEGER, СlientName TEXT);";
+                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserID BIGINTEGER , PhoneNamber TEXT);"+
+                "CREATE TABLE Files(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserID BIGINTEGER , FileName TEXT, Offer INTEGER, СlientName TEXT);";
 
         command.ExecuteNonQuery();
 

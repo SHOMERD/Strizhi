@@ -117,14 +117,14 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                 
 
                 string PhoneNamber = message.Text.Substring(message.Text.IndexOf("7"), 11);
-                if(await dataBase.CeckFileAsync(PhoneNamber))
+                if(/*await dataBase.CeckFileAsync(PhoneNamber)*/false)
                 {
                     messageСonstructor.СonstructMessage("AlreadyProcessed", UserID);
                 }
                 else
                 {
                     int FilsCount = (await dataBase.GetFilesAsync(UserID)).Where(a => a.Offer == -1).Count();
-                    if (FilsCount == 1)
+                    if (FilsCount > 1)
                     {
                         messageСonstructor.СonstructMessage("LotsOfFiles", UserID, MessegeText: $"У вас {FilsCount} файлов");
                     }
@@ -203,4 +203,4 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
 
 
     }
-}
+} 

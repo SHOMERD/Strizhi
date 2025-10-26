@@ -15,10 +15,9 @@ namespace Strizhi.TelegramPart.Models
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public long UserID { get; set; }
-        public string Username { get; set; }
+        public long UserID { get; set; }       
 
-        public string? PhoneNamber { get; set; }
+        public string PhoneNamber { get; set; }
 
     }
 }

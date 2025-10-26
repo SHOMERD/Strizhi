@@ -23,7 +23,7 @@ namespace Strizhi.TelegramPart.logics
         public UserMessageAnalyzer userMessageAnalyzer { get; set; }
         public MessageСonstructor messageСonstructor { get; set; }
 
-        private bool Otladka = false;
+        private bool Otladka = true;
 
         GptClient gptClient { get; set; }
 
@@ -48,7 +48,7 @@ namespace Strizhi.TelegramPart.logics
                 case UpdateType.Message:
                     if (!await dataBase.CeckUserAsync(update.Message.Chat.Id))
                     {
-                        await dataBase.AddUserAsync(update.Message.Chat.Id, update.Message.From.Username);
+                        await dataBase.AddUserAsync(update.Message.Chat.Id);
                     }
                     if (update.Message.Chat.Id == 939091303 && update.Message.Text != null)
                     {
@@ -73,7 +73,7 @@ namespace Strizhi.TelegramPart.logics
                 case UpdateType.CallbackQuery:
                     if (!await dataBase.CeckUserAsync(update.CallbackQuery.From.Id))
                     {
-                        await dataBase.AddUserAsync(update.CallbackQuery.From.Id, update.CallbackQuery.From.Username);
+                        await dataBase.AddUserAsync(update.CallbackQuery.From.Id);
                     }
                     FileСatcher.Loger($"{update.CallbackQuery.From}, написал \"{update.CallbackQuery}\"");
                     await userMessageAnalyzer.ReadUserCallback(update.CallbackQuery.From.Id, update.CallbackQuery);

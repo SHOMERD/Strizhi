@@ -128,7 +128,7 @@ namespace Strizhi.TelegramPart.logics
                 ButtonsTegs[1] += userFiles[i].FileName;
                 await botClient.SendMessage(
                     chatId: UserID,
-                    text: $"Файл по номеру {userFiles[i].FileName}\nПердположительное имя \"{FileСatcher.GetClientName(userFiles[i].FileName)}\"",
+                    text: $"Файл по номеру {userFiles[i].FileName}\nПердположительное имя \"{userFiles[i].СlientName}\"",
                     replyMarkup: (await GetKeyboardButtons(ButtonsTexts, ButtonsTegs))
                 );
             }

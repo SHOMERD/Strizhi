@@ -39,7 +39,7 @@ namespace ChatGptVisionClient
             _http = new HttpClient();
             UpdateData();
 
-            GPTVersion = "gpt-5-nano";
+            GPTVersion = "gpt-5-mini";
             if (string.IsNullOrEmpty(ApiKey))
             {
                 messageСonstructor.ErrorMessage("Set OPENAI_API_KEY environment variable first.");
