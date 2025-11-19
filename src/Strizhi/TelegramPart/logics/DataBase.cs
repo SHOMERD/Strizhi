@@ -48,6 +48,21 @@ namespace Strizhi.TelegramPart.logics
             Context.SaveChanges();
 
         }
+        internal async Task SetGPTAnsers(string fileName, string MainAnalysis, string MainOffer, string MoreOffer, string Apartments, string Competitors)
+        {
+
+
+
+        }
+
+        public async Task SetUserMod(long UserID, int Mod = 0)
+        {
+            TheUser theUser = await GetUserAsync(UserID);
+            theUser.Mod = Mod;
+
+            Context.Users.Update(theUser);
+            Context.SaveChanges();
+        }
 
         public async Task SetOffer(string FileName = null, string OfferNamber = "")
         {
@@ -69,6 +84,11 @@ namespace Strizhi.TelegramPart.logics
         public async Task<string> GetUserPhoneNamber(long GUserID)
         {
             string theUser = (Context.Users.First(a => a.UserID == GUserID)).PhoneNamber;
+            return theUser;
+        }
+        public async Task<int> GetUserMod(long GUserID)
+        {
+            int theUser = (Context.Users.First(a => a.UserID == GUserID)).Mod;
             return theUser;
         }
        
@@ -123,7 +143,7 @@ namespace Strizhi.TelegramPart.logics
 
         public async Task AddUserAsync(long UserID)
         {
-            TheUser user = new TheUser() { UserID = UserID, PhoneNamber ="no" };
+            TheUser user = new TheUser() { UserID = UserID, PhoneNamber ="no", Mod = 0 };
 
 
             if (!await CeckUserAsync(UserID))
@@ -190,12 +210,13 @@ namespace Strizhi.TelegramPart.logics
             command.Connection = connection;
 
             command.CommandText =
-                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserID BIGINTEGER , PhoneNamber TEXT);"+
+                "CREATE TABLE Users(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserID BIGINTEGER , PhoneNamber TEXT , Mod INTEGER);" +
                 "CREATE TABLE Files(Id INTEGER PRIMARY KEY AUTOINCREMENT, UserID BIGINTEGER , FileName TEXT, Offer INTEGER, СlientName TEXT);";
 
         command.ExecuteNonQuery();
 
         }
 
+        
     }
 }

@@ -68,6 +68,16 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                     Password = message.Text.Split("\n")[1];
                     return;
                 }
+                if (message.Text.Contains("/set_many"))
+                {
+                    dataBase.SetUserMod(UserID, 1);
+                    return;
+                }
+                if (message.Text.Contains("/stop"))
+                {
+                    dataBase.SetUserMod(UserID, 0);
+                    return;
+                }
 
             }
             if (message.Caption != null && message.Caption.Contains(Password))
@@ -129,10 +139,21 @@ namespace Strizhi.TelegramPart.logics.MessageAnalyzers
                         messageСonstructor.СonstructMessage("LotsOfFiles", UserID, MessegeText: $"У вас {FilsCount} файлов");
                     }
                     await FileСatcher.DownloadFile(uri, PhoneNamber);
-                    dataBase.AddFileAsync(UserID, PhoneNamber);
-                    dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
+                    
 
-                    messageСonstructor.СonstructMessage("Answer", UserID);
+                    int Mod = await dataBase.GetUserMod(UserID);
+                    if (Mod == 0)
+                    {
+                        dataBase.AddFileAsync(UserID, PhoneNamber);
+                        dataBase.SetUserStats(UserID, PhoneNamber: PhoneNamber);
+                        messageСonstructor.СonstructMessage("Answer", UserID);                       
+                    }
+                    else if (Mod == 1)
+                    {
+                        dataBase.AddFileAsync(-1, PhoneNamber);
+                        FilePreparer.PrepareFile(PhoneNamber, dataBase, gptClient);
+                    }
+                    
                 }             
             }
             else
